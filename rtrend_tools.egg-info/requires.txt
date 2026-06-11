@@ -1,0 +1,9 @@
+numpy
+pandas
+scipy
+colorama
+gh
+numba
+pathos
+matplotlib
+requests

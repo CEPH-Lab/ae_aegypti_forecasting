@@ -1,0 +1,30 @@
+> species = mosq_per_trap_night
+> truth_data_fname = data/raw/KeyWest/KeyWest.Aegypti.csv
+> tg_data_fname = dummy_placeholder.csv
+
+> use_dates_first = 2012-01-09
+> use_dates_last = 2020-11-23
+> step_weeks = 1
+> nweeks_fore = 4
+
+> preproc_roi_len = 53
+> use_integer_data = False
+> mcmc_roi_len_days = 365
+
+> synth_seed = 10
+> rn_num_samples = 1000
+> fit_normal = True
+> smooth_diff_dist = False
+
+> recons_seed = 30
+
+> apply_scores = True
+> do_plots = False
+> ncpus = 1
+> tg_max = 100000
+> ct_weekly_max = 100000
+> export = True
+> export_fore_quantiles = True
+> export_preprocess = True
+> export_rt_pastfore = True
+> export_noise_params = False
