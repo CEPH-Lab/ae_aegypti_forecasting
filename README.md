@@ -122,7 +122,7 @@ Steps 2–5 are independent and can be run in any order or in parallel. Steps 6�
 
 ---
 
-### Step 1 — Naive model
+### Step 1 - Naive model
 
 **Script:** `scripts/models/baseline_sweep_dates.py`
 
@@ -151,7 +151,7 @@ Optional flags:
 
 ---
 
-### Step 2 — Format naive output
+### Step 2 - Format naive output
 
 **Script:** `scripts/processing/format_naive_output.py`
 
@@ -166,7 +166,7 @@ python scripts/processing/format_naive_output.py
 
 ---
 
-### Step 3 — STL models
+### Step 3 - STL models
 
 **Script:** `scripts/models/seasonal_model.py`
 
@@ -199,7 +199,7 @@ current_level_used | seasonality_t | regime | sigma_used
 
 ---
 
-### Step 4 — SARIMAX model
+### Step 4 - SARIMAX model
 
 **Script:** `scripts/models/sarimax_model.py`
 
@@ -219,7 +219,7 @@ At least 20 training observations are required before the first forecast is gene
 
 ---
 
-### Step 5 — UCM model
+### Step 5 - UCM model
 
 **Script:** `scripts/models/ucm_model.py`
 
@@ -238,7 +238,7 @@ python scripts/models/ucm_model.py
 ---
 
 
-### Step 6 — Ensemble
+### Step 6 - Ensemble
 
 **Script:** `scripts/models/ensemble_model.py`
 
@@ -254,7 +254,7 @@ This is the single master file used by all the remaining scripts. It contains on
 
 ---
 
-### Step 7 — Score tabulation
+### Step 7 - Score tabulation
 
 **Script:** `scripts/score_comparison/score_tabulation.py`
 
@@ -286,7 +286,7 @@ ENSEMBLE
 
 ---
 
-### Step 8 — Visualization
+### Step 8 - Visualization
 
 All visualization scripts read from `data/processed/all_models_master.csv`. Figures are saved to `visualization/plots_master/` as PDF or PNG depending on the code.
 
@@ -328,10 +328,10 @@ python scripts/visualization/flusight_forecast_viz.py
 | Path | Created by | Contents |
 |---|---|---|
 | `data/interim/<loc>_aegypti_forecast.csv` | Step 1 | Naive raw quantile forecasts, unscored |
-| `data/processed/naive_<loc>_aegypti_forecast_scored.csv` | Step 5 | Naive forecasts, scored |
-| `data/processed/seasonal_n{1-4}_<loc>_aegypti_forecast_scored.csv` | Step 2 | Seasonal model forecasts, scored |
-| `data/processed/arima_<loc>_aegypti_forecast_scored.csv` | Step 3 | SARIMAX forecasts, scored |
-| `data/processed/ucm_<loc>_aegypti_forecast_scored.csv` | Step 4 | UCM forecasts, scored |
+| `data/processed/naive_<loc>_aegypti_forecast_scored.csv` | Step 2 | Naive forecasts, scored |
+| `data/processed/seasonal_n{1-4}_<loc>_aegypti_forecast_scored.csv` | Step 3 | Seasonal model forecasts, scored |
+| `data/processed/arima_<loc>_aegypti_forecast_scored.csv` | Step 4 | SARIMAX forecasts, scored |
+| `data/processed/ucm_<loc>_aegypti_forecast_scored.csv` | Step 5 | UCM forecasts, scored |
 | `data/processed/all_models_master.csv` | Step 6 | All models + ensemble in one file |
 | `data/scores/final_<loc>_aegypti_comparison.csv` | Step 7 | Per-location score comparison table |
 | `visualization/plots_master/` | Step 8 | All generated figures |
@@ -365,15 +365,21 @@ tqdm
 ```
 
 Install with:
-
 ```bash
-pip install numpy pandas scipy statsmodels matplotlib seaborn tqdm
+python setup.py
 ```
+
+This registers `rtrend_tools` and `toolbox` so all scripts can import them regardless of working directory.
 
 **Internal packages** (in this repository — install once in development mode from the repo root):
 
 ```bash
 pip install -e .
 ```
+---
 
-This registers `rtrend_tools` and `toolbox` so all scripts can import them regardless of working directory.
+## Citation
+
+If you use this work, please cite the following paper:
+
+Bhosekar, U., Ventura, P. C., Hill, M. D., Kummer, A. G., Mhade, S., Chitturi, J., Vasquez, C., Mutebi, J.-P., Townsend, J., Litvinova, M., Wilke, A. B. B., & Ajelli, M. (2026). Short-term forecasts of Aedes aegypti relative abundance to enhance mosquito control situational awareness. *bioRxiv*. https://doi.org/10.64898/2026.07.03.736030
