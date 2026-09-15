@@ -16,7 +16,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 BASE_DIR    = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MASTER_FILE = os.path.join(BASE_DIR, 'data', 'processed', 'all_models_master.csv')
-BASE_OUTPUT = os.path.join(BASE_DIR, 'visualization', 'plots_master', '12_Forecast_TimeSeries')
+BASE_OUTPUT = os.path.join(BASE_DIR, 'visualization', '12_Forecast_TimeSeries')
 
 plt.rcParams['font.family']      = 'sans-serif'
 plt.rcParams['font.sans-serif']  = ['Myriad Pro', 'Arial', 'DejaVu Sans']

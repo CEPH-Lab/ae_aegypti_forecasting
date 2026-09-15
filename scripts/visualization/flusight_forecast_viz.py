@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.append(BASE_DIR)
 
 MASTER_FILE = os.path.join(BASE_DIR, 'data', 'processed', 'ALL_MODELS_MASTER.csv')
-DEFAULT_OUTPUT = os.path.join(BASE_DIR, 'visualization', 'plots_master', '8_Flusight_TimeSeries')
+DEFAULT_OUTPUT = os.path.join(BASE_DIR, 'visualization', '8_Flusight_TimeSeries')
 
 # --- CUSTOM COLOR SCHEME ---
 COLORS = {

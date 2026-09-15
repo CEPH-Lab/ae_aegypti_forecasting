@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.append(BASE_DIR)
 
 MASTER_FILE = os.path.join(BASE_DIR, 'data', 'processed', 'all_models_master.csv')
-BASE_OUTPUT = os.path.join(BASE_DIR, 'visualization', 'plots_master')
+BASE_OUTPUT = os.path.join(BASE_DIR, 'visualization')
 
 ACTIVE_MODELS = ['seasonal_n1', 'seasonal_n2', 'seasonal_n3', 'seasonal_n4', 'arima', 'ucm', 'ensemble'] 
 
