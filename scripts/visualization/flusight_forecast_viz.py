@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.append(BASE_DIR)
 
 MASTER_FILE = os.path.join(BASE_DIR, 'data', 'processed', 'ALL_MODELS_MASTER.csv')
-DEFAULT_OUTPUT = os.path.join(BASE_DIR, 'visualization', '8_Flusight_TimeSeries')
+DEFAULT_OUTPUT = os.path.join(BASE_DIR, 'visualization', '3_Flusight_TimeSeries')
 
 # --- CUSTOM COLOR SCHEME ---
 COLORS = {
@@ -25,10 +25,11 @@ COLORS = {
     'seasonal_n2': '#8c6bb1',
     'seasonal_n3': '#88419d',
     'seasonal_n4': '#6e016b',
-    'naive': '#a8ddb5',
     'arima': '#7bccc4',
     'ucm': '#4eb3d3',
     'ensemble': '#08589e',
+    'naive': '#fec44f',
+    'seasonal_naive': '#d7301f'
 }
 
 def plot_mosquito_snapshots(
@@ -183,10 +184,20 @@ if __name__ == '__main__':
         forecast_origins=['2021-01-25', '2021-04-05', '2021-05-31', '2021-07-19', '2021-09-27', '2021-11-29']
     )
 
-    # Other models plot
+    # Naive and Seasonal Naive models plot
     plot_mosquito_snapshots(
         date_range=['2021-01-01', '2021-12-31'],
-        models=['naive', 'seasonal_n1', 'seasonal_n2', 'seasonal_n3', 'seasonal_n4', 'arima', 'ucm'],
+        models=['naive', 'seasonal_naive'],
+        intervals=[95],
+        location='miami',
+        species='aegypti',
+        forecast_origins=['2021-01-25', '2021-04-05', '2021-05-31', '2021-07-19', '2021-09-27', '2021-11-29']
+    )
+
+    # STL1, STL2, STL3, STL4, SARIMAX, UCM models models plot
+    plot_mosquito_snapshots(
+        date_range=['2021-01-01', '2021-12-31'],
+        models=['seasonal_n1', 'seasonal_n2', 'seasonal_n3', 'seasonal_n4', 'arima', 'ucm'],
         intervals=[95],
         location='miami',
         species='aegypti',
@@ -204,10 +215,20 @@ if __name__ == '__main__':
         forecast_origins=['2021-01-25', '2021-04-05', '2021-05-17', '2021-06-21', '2021-07-26', '2021-08-23', '2021-10-04', '2021-11-29']
     )
 
-    # Other models plot
+    # Naive and Seasonal Naive models plot
     plot_mosquito_snapshots(
         date_range=['2021-01-01', '2021-12-31'],
-        models=['naive', 'seasonal_n1', 'seasonal_n2', 'seasonal_n3', 'seasonal_n4', 'arima', 'ucm'],
+        models=['naive', 'seasonal_naive'],
+        intervals=[95],
+        location='maricopa',
+        species='aegypti',
+        forecast_origins=['2021-01-25', '2021-04-05', '2021-05-17', '2021-06-21', '2021-07-26', '2021-08-23', '2021-10-04', '2021-11-29']
+    )
+
+    # STL1, STL2, STL3, STL4, SARIMAX, UCM models models plot
+    plot_mosquito_snapshots(
+        date_range=['2021-01-01', '2021-12-31'],
+        models=['seasonal_n1', 'seasonal_n2', 'seasonal_n3', 'seasonal_n4', 'arima', 'ucm'],
         intervals=[95],
         location='maricopa',
         species='aegypti',

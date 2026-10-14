@@ -277,9 +277,9 @@ def forecast_this_date(
         print("len of series:", len(exd.past_diff_sr))
         print("stdev:", exd.past_diff_sr.std())
 
-        diff_values = np.arange(start=0, stop=max_z * stdev, step=0.001)
+        diff_values = np.arange(start = 0, stop=max_z * stdev, step = 1.0)
         exd.pred_dist = pd.Series(
-            scipy.stats.norm.pdf(diff_values, loc=0.0, scale=stdev),
+            scipy.stats.norm.pdf(diff_values, loc = 0.0, scale=stdev),
             index=diff_values,
         )
         exd.pred_dist /= exd.pred_dist.sum()

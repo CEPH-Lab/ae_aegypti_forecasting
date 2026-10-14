@@ -116,9 +116,9 @@ for location in LOCATIONS:
 
         # Linear interpolation for missing data
         abund_df = abund_df.set_index("date")
-        abund_df.index = abund_df.index.to_period("W").start_time
+        abund_df.index = abund_df.index.to_period("W-SUN").end_time.normalize()
 
-        full_index = pd.date_range(start=abund_df.index.min(), end=abund_df.index.max(), freq="W-MON")
+        full_index = pd.date_range(start=abund_df.index.min(), end=abund_df.index.max(), freq="W-SUN")
         full_df = abund_df.reindex(full_index)
         
         # Draw a straight line between missing dates
@@ -128,7 +128,7 @@ for location in LOCATIONS:
         weather_actual = weather_df[["custom_week_start", "weekly_avg_temperature", "sum_precipitation", "avg_temp_5yr", "sum_precip_5yr"]].rename(
             columns={"custom_week_start": "date", "weekly_avg_temperature": "actual_temp", "sum_precipitation": "actual_precip"}
         ).set_index("date")
-        weather_actual.index = weather_actual.index.to_period("W").start_time
+        weather_actual.index = weather_actual.index.to_period("W-SUN").end_time.normalize()
 
         full_df = full_df.merge(weather_actual, left_index=True, right_index=True, how="left")
 
@@ -148,7 +148,7 @@ for location in LOCATIONS:
         if start_date > end_date:
             continue
 
-        date_range = pd.date_range(start=start_date, end=end_date, freq="W-MON")
+        date_range = pd.date_range(start=start_date, end=end_date, freq="W-SUN")
 
         # ---------------------------
         # Forecast Loop

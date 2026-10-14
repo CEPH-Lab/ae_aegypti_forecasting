@@ -16,7 +16,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 BASE_DIR    = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MASTER_FILE = os.path.join(BASE_DIR, 'data', 'processed', 'all_models_master.csv')
-BASE_OUTPUT = os.path.join(BASE_DIR, 'visualization', '12_Forecast_TimeSeries')
+BASE_OUTPUT = os.path.join(BASE_DIR, 'visualization', '4_Forecast_TimeSeries')
 
 plt.rcParams['font.family']      = 'sans-serif'
 plt.rcParams['font.sans-serif']  = ['Myriad Pro', 'Arial', 'DejaVu Sans']
@@ -135,6 +135,27 @@ def plot_forecast_timeseries(
             ax.set_xlim(first_year_start, dates[-1])
             ax.set_ylim(bottom=0)
 
+            # --- ADD OUT OF SEASON SHADING FOR LA ---
+            if loc == 'la':
+
+                ## New method to add gray area
+                smoothed = pd.Series(observed).fillna(0).rolling(window=3, min_periods=1, center=True).mean()
+                is_oob = (observed < 0.1)
+
+                padded = np.pad(is_oob, (1,1), mode = 'constant', constant_values = False)
+                edges = np.diff(padded.astype(int))
+                starts = np.where(edges == 1)[0]
+                ends = np.where(edges == -1)[0] - 1
+
+                for s, e in zip(starts, ends):
+                    if (e - s + 1) < 4:
+                        continue
+                    if s == e:
+                        end_date = dates[e] + pd.Timedelta(days = 7)
+                    else:
+                        end_date = dates[e]
+                    ax.axvspan(dates[s], end_date, facecolor = '#D3D3D3', alpha = 1.0, zorder = 5, edgecolor = 'none')
+
             if col_idx == 0:
                 ax.set_ylabel('Mosquitoes per trap night', fontsize=12, fontweight='bold')
             else:
@@ -179,7 +200,7 @@ def plot_forecast_timeseries(
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
-    fname    = f'timeseries_{model_name}_{species}_h{horizon}_{interval}pct.pdf'
+    fname    = f'timeseries_{model_name}_{species}_h{horizon}_{interval}pct.png'
     out_path = os.path.join(save_dir, fname)
     plt.savefig(out_path, dpi=200, bbox_inches='tight')
     plt.close()

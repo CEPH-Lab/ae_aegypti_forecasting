@@ -27,7 +27,7 @@ agg = (
 agg['cov_95'] = agg['cov_95'] * 100
 
 # Setting model order
-model_order = ['NAIVE', 'SEASONAL_n1', 'SEASONAL_n2', 'SEASONAL_n3', 'SEASONAL_n4', 'ARIMA', 'UCM', 'ENSEMBLE']
+model_order = ['NAIVE', "Seasonal_Naive", 'SEASONAL_n1', 'SEASONAL_n2', 'SEASONAL_n3', 'SEASONAL_n4', 'ARIMA', 'UCM', 'ENSEMBLE']
 
 # Building tables
 for loc in locations:
