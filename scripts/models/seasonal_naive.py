@@ -55,7 +55,6 @@ def forecast_fixed_snaive(train_y_fixed, initial_train_end, future_idx, num_sims
     # 2. Iterate through the actual future forecast dates
     for step_idx, forecast_date in enumerate(future_idx):
         
-        # --- NEW CALENDAR ALIGNMENT LOGIC ---
         # Get the actual calendar week number (1 through 52, sometimes 53)
         target_week = forecast_date.isocalendar().week
         

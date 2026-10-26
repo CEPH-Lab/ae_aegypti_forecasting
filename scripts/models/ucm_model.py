@@ -84,35 +84,7 @@ for location in LOCATIONS:
         weather_df = pd.read_csv(weather_fp)
 
         abund_df["date"] = pd.to_datetime(abund_df["date"])
-        weather_df["custom_week_start"] = pd.to_datetime(weather_df["custom_week_start"])
-
-        # ---------------------------
-        # Rolling 5-Year weather
-        # ---------------------------
-        # Sorting chronologically
-        weather_df = weather_df.sort_values("custom_week_start").reset_index(drop=True)
-        weather_df['week'] = weather_df['custom_week_start'].dt.isocalendar().week
-        
-        # Sorting by week, then date, to apply the rolling window to each specific week
-        weather_df = weather_df.sort_values(['week', 'custom_week_start'])
-        
-        # Calculating rolling 5-year mean
-        weather_df['avg_temp_5yr'] = weather_df.groupby('week')['weekly_avg_temperature'].transform(
-            lambda x: x.rolling(window=5, min_periods=1, closed='left').mean()
-        )
-        weather_df['sum_precip_5yr'] = weather_df.groupby('week')['sum_precipitation'].transform(
-            lambda x: x.rolling(window=5, min_periods=1, closed='left').mean()
-        )
-        
-        # Sorting back to chronological order
-        weather_df = weather_df.sort_values('custom_week_start').reset_index(drop=True)
-        
-        # Filling the first year's NaNs (since it has no earlier data) with its own data
-        weather_df['avg_temp_5yr'] = weather_df['avg_temp_5yr'].fillna(weather_df['weekly_avg_temperature'])
-        weather_df['sum_precip_5yr'] = weather_df['sum_precip_5yr'].fillna(weather_df['sum_precipitation'])
-
-        # Creating a lookup for "future" climate (the most recent calculation for each week)
-        latest_climo = weather_df.groupby('week').last()[['avg_temp_5yr', 'sum_precip_5yr']]
+        weather_df["week_end"] = pd.to_datetime(weather_df["week_end"])
 
         # Linear interpolation for missing data
         abund_df = abund_df.set_index("date")
@@ -125,17 +97,12 @@ for location in LOCATIONS:
         full_df['mosq_per_trap_night'] = full_df['mosq_per_trap_night'].interpolate(method='linear')
 
         # Merging weather into framework
-        weather_actual = weather_df[["custom_week_start", "weekly_avg_temperature", "sum_precipitation", "avg_temp_5yr", "sum_precip_5yr"]].rename(
-            columns={"custom_week_start": "date", "weekly_avg_temperature": "actual_temp", "sum_precipitation": "actual_precip"}
+        weather_actual = weather_df[["week_end", "weekly_avg_temperature", "sum_precipitation", "avg_temp_5yr", "sum_precip_5yr"]].rename(
+            columns={"week_end": "date", "weekly_avg_temperature": "actual_temp", "sum_precipitation": "actual_precip"}
         ).set_index("date")
         weather_actual.index = weather_actual.index.to_period("W-SUN").end_time.normalize()
 
         full_df = full_df.merge(weather_actual, left_index=True, right_index=True, how="left")
-
-        # Filling any missing weather data (like future dates) with the latest known averages
-        weeks_idx = full_df.index.isocalendar().week
-        full_df["avg_temp_5yr"] = full_df["avg_temp_5yr"].fillna(weeks_idx.map(latest_climo["avg_temp_5yr"]))
-        full_df["sum_precip_5yr"] = full_df["sum_precip_5yr"].fillna(weeks_idx.map(latest_climo["sum_precip_5yr"]))
 
         # Fill actual weather holes with weather
         full_df["actual_temp"] = full_df["actual_temp"].fillna(full_df["avg_temp_5yr"])
