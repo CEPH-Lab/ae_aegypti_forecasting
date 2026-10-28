@@ -30,7 +30,7 @@ SPECIES = ["Aegypti"]
 # --------------------------------------------
 MIN_YEARS_TRAIN = 2          # Start forecasting after 2 years of history
 FORECAST_HORIZONS = [1, 2, 3, 4]
-ROLLING_N = 3                # Average of past 'n' weeks
+ROLLING_N = 4                # Average of past 'n' weeks
 SEASONAL_PERIOD = 52         # Weekly data
 NUM_SIMULATIONS = 1000       # Number of Monte Carlo trajectories
 
@@ -185,7 +185,7 @@ for location in LOCATIONS:
         df = df.sort_values("date").set_index("date")
         
         # Linear interpolation to fill missing data
-        df = df.asfreq("W-MON") 
+        df = df.asfreq("W-SUN") 
         df['mosq_per_trap_night'] = df['mosq_per_trap_night'].interpolate(method='linear')
 
         if df['mosq_per_trap_night'].dropna().empty:
@@ -201,7 +201,7 @@ for location in LOCATIONS:
             print("  Not enough data history.")
             continue
 
-        origin_dates = pd.date_range(start=initial_train_end, end=last_possible_origin, freq="W-MON")
+        origin_dates = pd.date_range(start=initial_train_end, end=last_possible_origin, freq="W-SUN")
         all_forecast_rows = []
         
         for i, origin_date in enumerate(origin_dates):

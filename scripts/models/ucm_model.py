@@ -3,6 +3,9 @@ import os
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+import warnings
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
+warnings.simplefilter('ignore', ConvergenceWarning)
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -68,7 +71,7 @@ def forecast_ucm(train_y, train_exog, future_exog, steps=4, quantiles=CDC_QUANTI
 print(f"\n=== Running UCM ===")
 for location in LOCATIONS:
     for species in SPECIES:
-        print(f"\n→ Processing {location} - {species}")
+        print(f"\n-> Processing {location} - {species}")
 
         abund_fp   = os.path.join(RAW_DATA_DIR, location, f"{location}.{species}.csv")
         weather_fp = os.path.join(RAW_DATA_DIR, location, f"weekly_weather_{location}.csv")

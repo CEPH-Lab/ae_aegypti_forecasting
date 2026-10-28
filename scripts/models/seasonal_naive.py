@@ -122,7 +122,7 @@ for location in LOCATIONS:
         abund_df = abund_df.set_index("date")
         abund_df.index = abund_df.index.to_period("W").start_time
 
-        full_index = pd.date_range(start=abund_df.index.min(), end=abund_df.index.max(), freq="W-MON")
+        full_index = pd.date_range(start=abund_df.index.min(), end=abund_df.index.max(), freq="W-SUN")
         full_df = abund_df.reindex(full_index)
         full_df['mosq_per_trap_night'] = full_df['mosq_per_trap_night'].interpolate(method='linear')
 
@@ -133,7 +133,7 @@ for location in LOCATIONS:
         if start_date > end_date:
             continue
 
-        date_range = pd.date_range(start=start_date, end=end_date, freq="W-MON")
+        date_range = pd.date_range(start=start_date, end=end_date, freq="W-SUN")
 
         # ---------------------------
         # Forecasting loop
@@ -203,56 +203,3 @@ for location in LOCATIONS:
             out_fp = os.path.join(PROCESSED_DATA_DIR, f"snaive_{location.lower()}_{species.lower()}_forecast_scored.csv")
             scored_df.to_csv(out_fp, index=False)
             print(f" Saved scored file: {out_fp}")
-
-
-
-
-
-
-
-
-
-
-# def forecast_snaive_trajectories(train_y, steps=4, seasonal_period=52, num_sims=10000, quantiles=CDC_QUANTILES_SEQ):
-#     """
-#     Seasonal Naive Forecast: y(T+h) = y(T+h-s)
-#     Generates quantiles by simulating normal distributions around the point forecast
-#     using the historical standard deviation of the seasonal residuals.
-#     """
-#     # 1. Calculate standard deviation of historical seasonal residuals (y_t - y_{t-52})
-#     residuals = train_y - train_y.shift(seasonal_period)
-#     sigma = residuals.std(ddof=1)
-    
-#     # Fallback if data has zero variance
-#     if pd.isna(sigma) or sigma == 0:
-#         sigma = 0.01
-
-#     means = []
-#     q_mat = []
-    
-#     for h in range(1, steps + 1):
-#         # 2. Point forecast: Look exactly 52 weeks back from the forecast target.
-#         # h=1 looks back 52 weeks (idx -52), h=2 looks back 51 weeks (idx -51), etc.
-#         lookback_idx = -seasonal_period + h - 1
-#         point_forecast = train_y.iloc[lookback_idx]
-        
-#         # 3. Simulate Trajectories
-#         # For a random walk with a seasonal step, the variance at horizon h (where h <= 52) is exactly sigma^2
-#         trajectories = np.random.normal(loc=point_forecast, scale=sigma, size=num_sims)
-        
-#         # Floor at 0.0 (Mimicking the linear SARIMAX code behavior before log transformation)
-#         point_forecast = max(0.0, point_forecast)
-#         trajectories = np.maximum(0.0, trajectories)
-        
-#         # 4. Extract quantiles
-#         step_quantiles = np.quantile(trajectories, quantiles)
-        
-#         means.append(point_forecast)
-#         q_mat.append(step_quantiles)
-        
-#     means = np.array(means)
-#     q_mat = np.array(q_mat).T  # Transpose to shape: (len(quantiles), steps)
-    
-#     qdict = {qcol(float(q)): q_mat[i, :] for i, q in enumerate(quantiles)}
-    
-#     return means, qdict, sigma

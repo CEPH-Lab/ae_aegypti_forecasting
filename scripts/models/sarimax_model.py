@@ -3,6 +3,9 @@ import os
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+import warnings
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
+warnings.simplefilter('ignore', ConvergenceWarning)
 from tqdm import tqdm
 from scipy.stats import norm
 
@@ -22,7 +25,7 @@ os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
 # ============================================
 # CONFIG
 # ============================================
-LOCATIONS = ["Miami"]
+LOCATIONS = ["KeyWest", "LA", "Maricopa", "Miami"]
 SPECIES = ["Aegypti"]
 
 ARIMA_ORDER = (1, 1, 2)
@@ -46,7 +49,7 @@ def extract_summary_from_quantiles(qvals: dict):
 # ============================================
 def forecast_arima(train_y, train_exog, future_exog, order, seasonal_order, steps=4, quantiles=CDC_QUANTILES_SEQ):
     model = sm.tsa.SARIMAX(train_y, exog=train_exog, order=order, seasonal_order=seasonal_order)
-    result = model.fit(maxiter=50, disp=False)
+    result = model.fit(disp=False)
     fc = result.get_forecast(steps=steps, exog=future_exog)
     mean = fc.predicted_mean.to_numpy()
     se   = fc.se_mean.to_numpy()
@@ -71,7 +74,7 @@ def forecast_arima(train_y, train_exog, future_exog, order, seasonal_order, step
 print(f"\n=== Running ARIMA {ARIMA_ORDER} | {SEASONAL_ORDER} ===")
 for location in LOCATIONS:
     for species in SPECIES:
-        print(f"\n→ Processing {location} - {species}")
+        print(f"\n -> Processing {location} - {species}")
 
         abund_fp   = os.path.join(RAW_DATA_DIR, location, f"{location}.{species}.csv")
         weather_fp = os.path.join(RAW_DATA_DIR, location, f"weekly_weather_{location}.csv")
@@ -188,6 +191,6 @@ for location in LOCATIONS:
             scored_df = calculate_row_metrics(forecast_df)
             
             # Save file
-            out_fp = os.path.join(PROCESSED_DATA_DIR, f"arima_{location.lower()}_{species.lower()}_forecast_scored.csv")
+            out_fp = os.path.join(PROCESSED_DATA_DIR, f"sarimax_{location.lower()}_{species.lower()}_forecast_scored.csv")
             scored_df.to_csv(out_fp, index=False)
             print(f" Saved scored file: {out_fp}")

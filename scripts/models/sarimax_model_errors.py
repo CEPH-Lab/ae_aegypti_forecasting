@@ -2,7 +2,11 @@ import sys
 import os
 import numpy as np
 import pandas as pd
+import scipy.stats as stats
 import statsmodels.api as sm
+import warnings
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
+warnings.simplefilter('ignore', ConvergenceWarning)
 import matplotlib.pyplot as plt
 
 # ============================================
@@ -32,7 +36,7 @@ print(f"\n=== Analyzing ARIMA {ARIMA_ORDER} | {SEASONAL_ORDER} Error Distributio
 
 for location in LOCATIONS:
     for species in SPECIES:
-        print(f"\n Analyzing 2-Year Error Distribution for {location} - {species}")
+        print(f"\n Analyzing Multi-Year Error Distribution for {location} - {species}")
 
         abund_fp   = os.path.join(RAW_DATA_DIR, location, f"{location}.{species}.csv")
         weather_fp = os.path.join(RAW_DATA_DIR, location, f"weekly_weather_{location}.csv")
@@ -50,16 +54,16 @@ for location in LOCATIONS:
 
         # Linear interpolation
         abund_df = abund_df.set_index("date")
-        abund_df.index = abund_df.index.to_period("W").start_time
+        abund_df.index = abund_df.index.to_period("W").end_time.normalize()
 
-        full_index = pd.date_range(start=abund_df.index.min(), end=abund_df.index.max(), freq="W-MON")
+        full_index = pd.date_range(start=abund_df.index.min(), end=abund_df.index.max(), freq="W-SUN")
         full_df = abund_df.reindex(full_index)
         full_df['mosq_per_trap_night'] = full_df['mosq_per_trap_night'].interpolate(method='linear')
 
         weather_actual = weather_df[["week_end", "weekly_avg_temperature", "sum_precipitation", "avg_temp_5yr", "sum_precip_5yr"]].rename(
             columns={"week_end": "date", "weekly_avg_temperature": "actual_temp", "sum_precipitation": "actual_precip"}
         ).set_index("date")
-        weather_actual.index = weather_actual.index.to_period("W").start_time
+        weather_actual.index = weather_actual.index.to_period("W").end_time.normalize()
 
         full_df = full_df.merge(weather_actual, left_index=True, right_index=True, how="left")
 
@@ -84,7 +88,7 @@ for location in LOCATIONS:
             continue
 
         # 3. Fit the Model
-        print(f" Fitting SARIMAX on initial 2-year window ({len(train_y_use)} weeks)...")
+        print(f" Fitting SARIMAX on whole time period of ({len(train_y_use)} weeks)...")
         model = sm.tsa.SARIMAX(
             train_y_use, 
             exog=train_exog_use, 
@@ -101,6 +105,10 @@ for location in LOCATIONS:
         # We skip the first 52 weeks of residuals because the seasonal lag (s=52)
         # means the model doesn't have a full year of history to use for the first year,
         # resulting in artificially inflated initial errors.
+        import scipy.stats as stats
+
+        # 4. Extract and Plot Residuals
+        # Skip the first 52 weeks of residuals
         residuals = result.resid.iloc[52:]
 
         # Print summary statistics to the console
@@ -110,16 +118,47 @@ for location in LOCATIONS:
         print(f"Min Error:       {residuals.min():.4f}")
         print(f"Max Error:       {residuals.max():.4f}")
 
-        # Create diagnostic plots
-        fig = result.plot_diagnostics(figsize=(14, 9))
-        fig.suptitle(f"Error Distribution (First 2 Years) - {location} {species}\nARIMA {ARIMA_ORDER} {SEASONAL_ORDER}", y=1.02, fontsize=16)
+        # Create a 2x2 grid for diagnostic plots
+        fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+
+        # Plot 1: Mistakes Over Time
+        axes[0, 0].plot(residuals)
+        axes[0, 0].axhline(0, color='black', linestyle='--', alpha=0.5)
+        axes[0, 0].set_title("1. Mistakes Over Time")
+
+        # Plot 2: Histogram + Density (INCREASED BINS HERE)
+        # Change 'bins=30' to whatever number you prefer
+        axes[0, 1].hist(residuals, bins=30, density=True, alpha=0.6, color='skyblue', edgecolor='black')
+        
+        # Calculate and plot the actual shape (KDE)
+        kde = sm.nonparametric.KDEUnivariate(residuals)
+        kde.fit()
+        axes[0, 1].plot(kde.support, kde.density, color='red', label='Actual Shape')
+        
+        # Calculate and plot the perfect bell curve (Normal Dist)
+        x_vals = np.linspace(residuals.min(), residuals.max(), 100)
+        axes[0, 1].plot(x_vals, stats.norm.pdf(x_vals, loc=residuals.mean(), scale=residuals.std()), 
+                        color='green', linestyle='--', label='Normal Bell Curve')
+        axes[0, 1].legend()
+        axes[0, 1].set_title("2. Size of Mistakes")
+
+        # Plot 3: Q-Q Plot
+        sm.qqplot(residuals, line='s', ax=axes[1, 0])
+        axes[1, 0].set_title("3. Normal Q-Q")
+
+        # Plot 4: Correlogram (ACF)
+        max_lags = min(len(residuals) // 2 - 1, 10)
+        sm.graphics.tsa.plot_acf(residuals, ax=axes[1, 1], lags=max_lags)
+        axes[1, 1].set_title("4. Correlogram (Do past mistakes predict future ones?)")
+
+        fig.suptitle(f"SARIMAX Error Distribution ({len(train_y_use)} weeks) - {location} {species}", fontsize=16)
+        
+        # Use tight_layout with a rect parameter to perfectly space the title and subplots
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
         
         # Save the plot
-        plot_path = os.path.join(PLOTS_DIR, f"error_dist_{location}_{species}.png")
+        plot_path = os.path.join(PLOTS_DIR, f"sarimax_error_dist_{location}_{species}.png")
         plt.savefig(plot_path, bbox_inches='tight')
         print(f" Saved diagnostic plot to {plot_path}")
-        
-        # Display the plot
-        plt.show()
 
 print("\n=== Finished Analysis ===")
