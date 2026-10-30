@@ -2,8 +2,8 @@
 > truth_data_fname = data/raw/LA/LA.Aegypti.csv
 > tg_data_fname = dummy_placeholder.csv
 
-> use_dates_first = 2020-01-05
-> use_dates_last = 2021-11-29
+> use_dates_first = 2020-01-12
+> use_dates_last = 2021-11-14
 > step_weeks = 1
 > nweeks_fore = 4
 

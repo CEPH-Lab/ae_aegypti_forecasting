@@ -15,7 +15,7 @@ def main():
 
     print("\n-> Step 1: Loading all scored baseline models...")
     
-    # Finds all processed forecast files, EXCLUDING any old master/ensemble files to prevent infinite loops
+    # Finds all processed forecast files
     search_pattern = os.path.join(PROCESSED_DIR, "*_forecast_scored.csv")
     files = [f for f in glob.glob(search_pattern) if "ensemble" not in f.lower() and "all_models" not in f.lower()]
     
